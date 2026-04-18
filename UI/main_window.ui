@@ -77,6 +77,10 @@
           color: black;
           font-size: 10pt;
       }
+      QInputDialog QLabel {
+          color: black;
+          font-size: 10pt;
+      }
       QMessageBox QPushButton {
           color: black;
           background-color: #e0e0e0;

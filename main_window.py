@@ -1,4 +1,3 @@
-import sys
 from PyQt5.QtWidgets import (QMainWindow, QTableWidgetItem, QMessageBox,
                              QInputDialog)
 from PyQt5.uic import loadUi
@@ -28,11 +27,10 @@ class MainWindow(QMainWindow):
 
     def setup_table(self):
         """Настройка таблицы"""
-        self.tableWidget.setColumnCount(3)
-        self.tableWidget.setHorizontalHeaderLabels(['ID', 'Страна', 'Столица'])
-        self.tableWidget.setColumnWidth(0, 85)
-        self.tableWidget.setColumnWidth(1, 375)
-        self.tableWidget.setColumnWidth(2, 375)
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setHorizontalHeaderLabels(['Страна', 'Столица'])
+        self.tableWidget.setColumnWidth(0, 450)
+        self.tableWidget.setColumnWidth(1, 450)
         self.tableWidget.setSelectionBehavior(self.tableWidget.SelectRows)
         self.tableWidget.setEditTriggers(self.tableWidget.NoEditTriggers)
 
@@ -66,9 +64,9 @@ class MainWindow(QMainWindow):
 
         for row, capital in enumerate(capitals_list):
             self.tableWidget.insertRow(row)
-            self.tableWidget.setItem(row, 0, QTableWidgetItem(str(capital['id'])))
-            self.tableWidget.setItem(row, 1, QTableWidgetItem(capital['country']))
-            self.tableWidget.setItem(row, 2, QTableWidgetItem(capital['capital']))
+            # self.tableWidget.setItem(row, 0, QTableWidgetItem(str(capital['id'])))
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(capital['country']))
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(capital['capital']))
 
     def add_capital(self):
         """Добавление новой столицы"""
@@ -138,9 +136,9 @@ class MainWindow(QMainWindow):
             return
 
         # Получаем данные выбранной записи
-        record_id = int(self.tableWidget.item(current_row, 0).text())
-        current_country = self.tableWidget.item(current_row, 1).text()
-        current_capital = self.tableWidget.item(current_row, 2).text()
+        current_country = self.tableWidget.item(current_row, 0).text()
+        current_capital = self.tableWidget.item(current_row, 1).text()
+        record_id = int(self.repo.filter_by_country(current_country)[0]['id'])
 
         # Диалог для выбора что редактировать
         items = ["Страну", "Столицу", "И страну, и столицу"]
@@ -191,9 +189,8 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Ошибка", "Выберите запись для удаления!")
             return
 
-        record_id = int(self.tableWidget.item(current_row, 0).text())
-        country = self.tableWidget.item(current_row, 1).text()
-        capital = self.tableWidget.item(current_row, 2).text()
+        country = self.tableWidget.item(current_row, 0).text()
+        capital = self.tableWidget.item(current_row, 1).text()
 
         # Подтверждение удаления
         reply = QMessageBox.question(self, "Подтверждение",
@@ -202,7 +199,7 @@ class MainWindow(QMainWindow):
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            if self.repo.delete_capital(record_id):
+            if self.repo.delete_capital(country):
                 QMessageBox.information(self, "Успех", "Запись успешно удалена!")
                 self.refresh_table()
             else:
