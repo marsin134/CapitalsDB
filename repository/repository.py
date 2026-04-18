@@ -1,4 +1,12 @@
 import sqlite3
+import ctypes
+
+dll = ctypes.CDLL("./asm/db_wrapper.dll")
+
+dll.check_rowcount_wrapper.argtypes = [ctypes.c_longlong]
+dll.check_rowcount_wrapper.restype = ctypes.c_int
+dll.choose_field_wrapper.argtypes = [ctypes.c_longlong]
+dll.choose_field_wrapper.restype = ctypes.c_int
 
 
 class CapitalRepository:
@@ -34,10 +42,9 @@ class CapitalRepository:
         try:
             cursor.execute("INSERT INTO capitals (country, capital) VALUES (?, ?)", (country, capital))
             self.connection.commit()
-            # print(f"Добавлено: {country} - {capital}")
             return cursor.lastrowid
         except sqlite3.IntegrityError:
-            # print(f"Ошибка: Страна '{country}' уже существует")
+            print(f"Ошибка: Страна '{country}' уже существует")
             return None
         finally:
             cursor.close()
@@ -53,17 +60,12 @@ class CapitalRepository:
 
             self.connection.commit()
 
-            if cursor.rowcount > 0:
-                # print(f"Удалено записей: {cursor.rowcount}")
-                return True
-            else:
-                # print(f"Запись не найдена")
-                return False
+            # ASM
+            return bool(dll.check_rowcount_wrapper(cursor.rowcount))
         finally:
             cursor.close()
 
     def update_capital(self, identifier, new_country=None, new_capital=None):
-        """Редактирование записи по ID или стране"""
         cursor = self.connection.cursor()
         try:
             if new_country and new_capital:
@@ -76,25 +78,26 @@ class CapitalRepository:
                 query = "UPDATE capitals SET capital = ? WHERE "
                 params = [new_capital]
             else:
-                # print("Нет данных для обновления")
                 return False
 
-            if isinstance(identifier, int):
+            is_int = isinstance(identifier, int)
+
+            # ASM
+            result = dll.choose_field_wrapper(1 if is_int else 0)
+
+            if result == 1:
                 query += "id = ?"
-                params.append(identifier)
             else:
                 query += "country = ?"
-                params.append(identifier)
+
+            params.append(identifier)
 
             cursor.execute(query, params)
             self.connection.commit()
 
-            if cursor.rowcount > 0:
-                # print(f"Обновлено записей: {cursor.rowcount}")
-                return True
-            else:
-                # print(f"Запись не найдена")
-                return False
+            # ASM
+            return bool(dll.check_rowcount_wrapper(cursor.rowcount))
+
         finally:
             cursor.close()
 
@@ -138,4 +141,4 @@ class CapitalRepository:
         """Закрытие соединения с БД"""
         if self.connection:
             self.connection.close()
-        # print("Соединение с БД закрыто")
+        print("Соединение с БД закрыто")

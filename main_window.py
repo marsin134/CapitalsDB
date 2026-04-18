@@ -1,7 +1,6 @@
 import sys
 from PyQt5.QtWidgets import (QMainWindow, QTableWidgetItem, QMessageBox,
-                             QInputDialog, QApplication)
-from PyQt5.QtCore import Qt
+                             QInputDialog)
 from PyQt5.uic import loadUi
 from repository.repository import CapitalRepository
 
@@ -102,9 +101,9 @@ class MainWindow(QMainWindow):
         self.display_capitals(results)
 
         if results:
-            self.infoLabel.setText(f"🔍 Найдено записей: {len(results)}")
+            self.infoLabel.setText(f"Найдено записей: {len(results)}")
         else:
-            self.infoLabel.setText(f"❌ Ничего не найдено по запросу '{keyword}'")
+            self.infoLabel.setText(f"Ничего не найдено по запросу '{keyword}'")
             QMessageBox.information(self, "Результат", f"По запросу '{keyword}' ничего не найдено")
 
     def filter_capitals(self):
@@ -126,9 +125,9 @@ class MainWindow(QMainWindow):
         self.display_capitals(results)
 
         if results:
-            self.infoLabel.setText(f"🎯 Отфильтровано по {filter_text}: {len(results)} записей")
+            self.infoLabel.setText(f"Отфильтровано по {filter_text}: {len(results)} записей")
         else:
-            self.infoLabel.setText(f"❌ Не найдено по {filter_text}")
+            self.infoLabel.setText(f"Не найдено по {filter_text}")
             QMessageBox.information(self, "Результат", f"По {filter_text} ничего не найдено")
 
     def edit_capital(self):
